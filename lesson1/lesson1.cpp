@@ -17,6 +17,7 @@
 второй — calculate, который будет выводить результат возведения первого числа в степень второго числа. 
 Задать значения этих двух чисел по умолчанию.
 */
+
 class Power {
     double number1 = 3.3;
     double number2 = 47.47;
@@ -30,7 +31,6 @@ public:
     }
 };
 
-
 /*
 Задание 2
 Написать класс с именем RGBA, который содержит 4 переменные-члена типа std::uint8_t: 
@@ -39,6 +39,7 @@ m_red, m_green, m_blue и m_alpha (#include cstdint для доступа к э�
 Создать конструктор со списком инициализации членов, 
 который позволит пользователю передавать значения для m_red, m_blue, m_green и m_alpha. 
 Написать функцию print(), которая будет выводить значения переменных-членов.
+std::cout.operator<<(aa);
 */
 
 class RGBA {
@@ -46,15 +47,21 @@ class RGBA {
     public:
     RGBA(){}
     RGBA(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha)
-    : m_red(red), m_green(green), m_blue(blue), m_alpha(alpha) {
-    }
+    : m_red(red), m_green(green), m_blue(blue), m_alpha(alpha) {}
     void print(){
-        std::cout << "m_red = " << (int*)m_red << std::endl;
-        std::cout << "m_green = " << (int*)m_green << std::endl;
-        std::cout << "m_blue = " << (int*)m_blue << std::endl;
-        std::cout << "m_alpha = " << (int*)m_alpha << std::endl;
+        std::cout << "m_red = ";
+        std::cout.operator<<(m_red); //uint8_t компилятор воспринимает как CHAR
+        std::cout << std::endl;
+        std::cout << "m_green = ";
+        std::cout.operator<<(m_green);
+        std::cout << std::endl;
+        std::cout << "m_blue = ";
+        std::cout.operator<<(m_blue); 
+        std::cout << std::endl;
+        std::cout << "m_alpha = ";
+        std::cout.operator<<(m_alpha);
+        std::cout << std::endl;
     }
-
 };
 
 /*
@@ -82,7 +89,7 @@ class Stack {
     };
     int push(int n){
         if (len == 10) return false;
-        arr[len] = n;
+        arr[len] = n; //элементы в массиве нумеруются с 0, так что len соответствует следующему элементу 
         len++;
         return true;
     };
@@ -91,9 +98,9 @@ class Stack {
             std::cout << "Stack is empty" << std::endl;
             return;
         }
-        std::cout << arr[len - 1] << std::endl;
-        len--;
-        arr[len] = 0;
+        std::cout << arr[len - 1] << std::endl; //выводим эелемент
+        len--;                                  //сдвигаем счетчик, он же указатель на следующий элемент 
+        arr[len] = 0;                           //очищаем 
     };
     void print(){
         std::cout << "( ";
@@ -104,18 +111,18 @@ class Stack {
     };
 };
 
-
 ////////////////////////////////////////////////////////////////////////////////////////
 int main(const int argc, const char **argv){
     Power test;
-    test.set(5, 3);
-    std::cout << test.calculate() << std::endl;
+    std::cout << test.calculate() << std::endl; //для значений по умолчанию
+    test.set(5, 3);                             //задаем значения
+    std::cout << test.calculate() << std::endl; //для заданных значений
 
     RGBA rgba;
-    rgba.print();
+    rgba.print();                               //для значений по умолчанию (констуктор по умолчанию)
 
     RGBA rgba2(101, 102, 103, 104);
-    rgba2.print();
+    rgba2.print();                              //для заданных пользователем значений (конструктор с параметрами)
 
     Stack stack;
     stack.reset();
