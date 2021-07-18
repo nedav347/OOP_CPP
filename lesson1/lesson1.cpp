@@ -108,10 +108,9 @@ class Stack {
             std::cout << arr[i] << " ";
         }
         std::cout << ")" << std::endl;
-    };
+    };s
 };
 
-////////////////////////////////////////////////////////////////////////////////////////
 int main(const int argc, const char **argv){
     Power test;
     std::cout << test.calculate() << std::endl; //для значений по умолчанию
