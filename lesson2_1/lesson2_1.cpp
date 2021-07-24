@@ -150,40 +150,34 @@ class Game{
     Dealer dealer;
     Deck deck;
     Stat s;
-    public:
+    public: //здесь будуе некоторые функции
     char compareSum();
     bool checkWins();
     char checkEnd();
     bool startBet();
     bool startGame();
-    void beginGame();
-    void beginMenu();
-    void saveGame();
-    void loadGame();
     void printStatistics();
     void printInstructions();
-    void printTop();
-    void printBody();
+    //..
 };
 
 class Deck{
     std::vector<Card> deck;
     public:
-    void initializeDeck();
-    Card deal();
+    void initDeck();
+    //..
 };
 
 class Card{
     int number;
     char suit;
-    public:
-    int getNumber();
-    char getSuit();
+    public: 
     void setNumber(int no);
     void setSuit(char c);
-    char getPrintNumber();
-    void printCardL1();
-    void printCardL2();
+    int getNumber();
+    char getSuit();
+    void printCard();
+    //..
 };
 
 class Hand{
@@ -192,8 +186,8 @@ class Hand{
     public:
     int getSum();
     void addCard(Card c);
-    void clearCards();
     void printCards();
+    //..
 };
 
 class Player: public Hand{
@@ -202,16 +196,16 @@ class Player: public Hand{
     int wins, loses;
     public:
     std::string getName();
-    int getBet();
-    int getCash();
-    int getWins();
-    int getLoses();
     void setName(std::string nm);
     void setBet(int b);
     void addCash(int c);
     void incrementWins();
     void incrementLoses();
-    void clearCards();
+    int getBet();
+    int getCash();
+    int getWins();
+    int getLoses();
+    //..
 };
 
 class Dealer: public Hand{
@@ -224,15 +218,15 @@ class Stat{
     std::string name;
     int cash, wins, loses;
     public:
+    void setName(std::string nm);
+    void setCash(int c);
+    void setWins(int w);
+    void setLoses(int l);
     std::string getName();
     int getCash();
     int getWins();
     int getLoses();
-    void setValues(std::string nm, int c, int w, int l);
-    bool check(Player pl);
-    void print();
-    void saveStats();
-    void loadStats();
+    //..
 };
 
 
