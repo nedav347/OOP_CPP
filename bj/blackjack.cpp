@@ -10,6 +10,8 @@
 #include <cstdint>
 //#include <string>
 #include <vector>
+#include <algorithm>
+#include <ctime>
 
 #include "blackjack.hpp"
 
@@ -66,6 +68,7 @@ int Hand::getValue() const{
 GenericPlayer::GenericPlayer(const string& name =""){
     m_Name = name;
 }
+GenericPlayer::~GenericPlayer(){}
 bool GenericPlayer::isBoosted() const{
     return (getValue() > 21);
 }
@@ -84,22 +87,19 @@ void GenericPlayer::Bust() const{
 Player::Player(const string& name){
     m_Name = name;
 }
-bool Player::IsHitting() const{
+bool Player::isHitting() const{
     cout << m_Name << ", do you want a hit? (Y/N): ";
     char response;
     cin >> response;
     return (response == 'y' || response == 'Y');
 }
-void Player::Win() const
-{
+void Player::Win() const{
     cout << m_Name << " wins.\n";
 }
-void Player::Lose() const
-{
+void Player::Lose() const{
     cout << m_Name << " loses.\n";
 }
-void Player::Push() const
-{
+void Player::Push() const{
     cout << m_Name << " pushes.\n";
 }
 
@@ -113,7 +113,7 @@ House::House(const string& name){
     m_Name = "House";
 }
 House::~House(){}
-bool House::IsHitting() const{
+bool House::isHitting() const{
     return (getValue() <= 16);
 }
 void House::FlipFirstCard(){
@@ -162,15 +162,163 @@ ostream& operator<<(ostream& os, const GenericPlayer& gp){
     return os;
 }
 
+/*
+Задание 3 к уроку 7.
+Создать класс Deck, который наследует от класса Hand и представляет собой колоду карт. Класс Deck имеет 4 метода:
+●	vold Populate() - Создает стандартную колоду из 52 карт, вызывается из конструктора.
+●	void Shuffle() - Метод, который тасует карты, можно использовать функцию из алгоритмов STL random_shuffle
+●	vold Deal (Hand& aHand) - метод, который раздает в руку одну карту
+●	void AddltionalCards (GenericPlayer& aGenerlcPlayer) - раздает игроку дополнительные карты до тех пор, пока он может и хочет их получать
+Обратите внимание на применение полиморфизма. В каких методах применяется этот принцип ООП?
+*/
+Deck::Deck(){
+    cards.reserve(52);
+    Populate();
+}
+Deck::~Deck(){}
+void Deck::Populate(){
+    clearHand();
+    for (int s = Card::HEARTS; s <= Card::SPADES; ++s)
+    {
+        for (int n = Card::ACE; n <= Card::KING; ++n)
+        {
+            addCard(new Card(static_cast<Card::suit>(s), static_cast<Card::number>(n)));
+        }
+    }
+}
+void Deck::Shuffle(){
+        random_shuffle(cards.begin(), cards.end());
+}
+void Deck::Deal (Hand& aHand){
+    if (!cards.empty())
+    {
+        aHand.addCard(cards.back());
+        cards.pop_back();
+    }
+    else
+    {
+        cout << "Out of cards. Unable to deal.";
+    }
+
+}
+void Deck::AddltionalCards (GenericPlayer& gp){
+    cout << endl;
+    while (!(gp.isBoosted()) && gp.isHitting())
+    {
+        Deal(gp);
+        cout << gp << endl;
+        
+        if (gp.isBoosted())
+        {
+            gp.Bust();
+        }
+    }
+}
+/*
+Задание 4 к уроку 7. 
+Реализовать класс Game, который представляет собой основной процесс игры. У этого класса будет 3 поля:
+●	колода карт
+●	рука дилера
+●	вектор игроков.
+Конструктор класса принимает в качестве параметра вектор имен игроков и создает объекты самих игроков. 
+В конструкторе создается колода карт и затем перемешивается. 
+Также класс имеет один метод play(). 
+В этом методе раздаются каждому игроку по две стартовые карты, а первая карта дилера прячется. 
+Далее выводится на экран информация о картах каждого игра, в т.ч. и для дилера. 
+Затем раздаются игрокам дополнительные карты. 
+Потом показывается первая карта дилера и дилер набирает карты, если ему надо. 
+После этого выводится сообщение, кто победил, а кто проиграл. 
+В конце руки всех игроков очищаются.
+*/
+Game::Game(const vector<string>& names){
+    vector<string>::const_iterator pName;
+    for (pName = names.begin(); pName != names.end(); ++pName){
+        players.push_back(Player(*pName));
+    }
+    srand(static_cast<unsigned int>(time(0)));
+    m_deck.Populate();
+    m_deck.Shuffle();
+}
+
+Game::~Game(){}
+
+void Game::play()
+{
+    vector<Player>::iterator pPlayer;
+    for (int i = 0; i < 2; ++i){
+        for (pPlayer = players.begin(); pPlayer != players.end(); ++pPlayer){
+            m_deck.Deal(*pPlayer);
+        }
+        m_deck.Deal(m_house);
+    }
+    m_house.FlipFirstCard();
+    for (pPlayer = players.begin(); pPlayer != players.end(); ++pPlayer){
+        cout << *pPlayer << endl;
+    }
+    cout << m_house << endl;
+    for (pPlayer = players.begin(); pPlayer != players.end(); ++pPlayer){
+        m_deck.AddltionalCards(*pPlayer);
+    }
+    m_house.FlipFirstCard();
+    cout << endl << m_house;
+    m_deck.AddltionalCards(m_house);
+    if (m_house.isBoosted()){
+        for (pPlayer = players.begin(); pPlayer != players.end(); ++pPlayer){
+            if (!(pPlayer->isBoosted())){
+                pPlayer->Win();
+            }
+        }
+    } else {
+        for (pPlayer = players.begin(); pPlayer != players.end(); ++pPlayer){
+            if (!(pPlayer->isBoosted())){
+                if (pPlayer->getValue() > m_house.getValue()){
+                    pPlayer->Win();
+                } else if (pPlayer->getValue() < m_house.getValue()) {
+                    pPlayer->Lose();
+                } else {
+                    pPlayer->Push();
+                }
+            }
+        }
+        
+    }
+    for (pPlayer = players.begin(); pPlayer != players.end(); ++pPlayer){
+        pPlayer->clearHand();
+    }
+    m_house.clearHand();
+}
+
+/*
+Задание 5 к уроку 7.
+Написать функцию main() к игре Блекджек. 
+В этой функции вводятся имена игроков. 
+Создается объект класса Game и запускается игровой процесс. 
+Предусмотреть возможность повторной игры.
+*/
+
 /*=============================================================================================*/
 int main(const int argc, const char **argv){
+    int numberOfPlayers = 0;
+    string nameP;
+    vector<string> namePlayers;
+    while (numberOfPlayers < 1 || numberOfPlayers > 7){
+        cout << "Enter numbers of player: ";
+        cin >> numberOfPlayers;
+    }
+    for (int i = 0; i < numberOfPlayers; ++i){
+        cout << "Enter Name Player " << i << " : ";
+        cin >> nameP;
+        namePlayers.push_back(nameP);
+    }
+    cout << endl;
 
-    Hand h1;
-    Card c1;
-    Card c2;
-    h1.addCard(&c1);
-    h1.addCard(&c2);
-    cout << h1.getValue() << endl;
- 
+    Game game(namePlayers);
+    char repeat = 'y';
+    while (repeat != 'n' && repeat != 'N'){
+        game.play();
+        cout << "\nRepeat Game? (Y/n): ";
+        cin >> repeat;
+    }
+
     return 0;
 }
